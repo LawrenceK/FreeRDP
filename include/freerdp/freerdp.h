@@ -25,7 +25,7 @@
 #include "constants_ui.h"
 #include "rdpext.h"
 
-#define FREERDP_INTERFACE_VERSION 4
+#define FREERDP_INTERFACE_VERSION 5
 
 #if defined _WIN32 || defined __CYGWIN__
   #ifdef FREERDP_EXPORTS
@@ -143,6 +143,12 @@ struct rdp_inst
 	int (* ui_decode)(rdpInst * inst, uint8 * data, int data_size);
 	RD_BOOL (* ui_check_certificate)(rdpInst * inst, const char * fingerprint,
 		const char * subject, const char * issuer, RD_BOOL verified);
+	void (* ui_add_char)(rdpInst * inst, uint8 font, uint16 character, sint16 offset,
+		sint16 baseline, uint16 width, uint16 height, uint8 * data);
+	void (* ui_draw_text)(rdpInst * inst, uint8 font, uint8 flags, uint8 opcode,
+		int mixmode, int x, int y, int clipx, int clipy, int clipcx, int clipcy,
+		int boxx, int boxy, int boxcx, int boxcy, RD_BRUSH * brush,
+		uint32 bgcolor, uint32 fgcolor, uint8 * text, uint8 length);
 };
 
 FREERDP_API rdpInst *
