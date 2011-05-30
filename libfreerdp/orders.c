@@ -1134,6 +1134,14 @@ draw_text(rdpOrders * orders, uint8 font, uint8 flags, uint8 opcode, int mixmode
 	int i, j;
 	uint8 * btext;
 
+	if (orders->rdp->settings->text_flags & 1)
+	{
+		ui_draw_text(orders->rdp->inst, font, flags, opcode, mixmode, x, y,
+			clipx, clipy, clipcx, clipcy, boxx, boxy, boxcx, boxcy,
+			brush, bgcolor, fgcolor, text, length);
+		return;
+	}
+
 	/* Sometimes, the boxcx value is something really large, like
 	   32691. This makes XCopyArea fail with Xvnc. The code below
 	   is a quick fix. */
@@ -1441,7 +1449,6 @@ process_fast_glyph(rdpOrders * orders, STREAM s, FAST_GLYPH_ORDER * os, uint32 p
 	int boxy2;
 	int boxcx;
 	int boxcy;
-	int character;
 	int offset;
 	int baseline;
 	int width;
@@ -1451,6 +1458,7 @@ process_fast_glyph(rdpOrders * orders, STREAM s, FAST_GLYPH_ORDER * os, uint32 p
 	int gx;
 	int gy;
 	int index;
+	uint8 character;
 
 	if (present & 0x000001)
 		in_uint8(s, os->font);
@@ -1549,27 +1557,49 @@ process_fast_glyph(rdpOrders * orders, STREAM s, FAST_GLYPH_ORDER * os, uint32 p
 		baseline = parse_s2byte(os->data, &index);
 		width = parse_u2byte(os->data, &index);
 		height = parse_u2byte(os->data, &index);
-		gl = ui_create_glyph(orders->rdp->inst, width, height, os->data + index);
-		cache_put_font(orders->rdp->cache, os->font, character, offset, baseline, width, height, gl);
-	}
-	ft = cache_get_font(orders->rdp->cache, os->font, character);
-	if (ft != NULL)
-	{
-		gx = x + ft->offset;
-		gy = y + ft->baseline;
-		if (boxcx > 1)
+		if (orders->rdp->settings->text_flags & 1)
 		{
-			ui_rect(orders->rdp->inst, boxx1, boxy1, boxcx, boxcy, os->bgcolor);
-		}
-		ui_start_draw_glyphs(orders->rdp->inst, os->bgcolor, os->fgcolor);
-		ui_draw_glyph(orders->rdp->inst, gx, gy, ft->width, ft->height, ft->pixmap);
-		if (boxcx > 1)
-		{
-			ui_end_draw_glyphs(orders->rdp->inst, boxx1, boxy1, boxcx, boxcy);
+			ui_add_char(orders->rdp->inst, os->font, character, offset, baseline,
+				width, height, os->data + index);
 		}
 		else
 		{
-			ui_end_draw_glyphs(orders->rdp->inst, clipx1, clipy1, clipcx, clipcy);
+			gl = ui_create_glyph(orders->rdp->inst, width, height, os->data + index);
+			cache_put_font(orders->rdp->cache, os->font, character, offset, baseline,
+				width, height, gl);
+		}
+	}
+	if (orders->rdp->settings->text_flags & 1)
+	{
+		ui_draw_text(orders->rdp->inst, os->font,
+			/* TEXT2_IMPLICIT_X == SO_CHAR_INC_EQUAL_BM_BASE */
+			os->flags | TEXT2_IMPLICIT_X,
+			os->opcode, MIX_TRANSPARENT, x, y,
+			clipx1, clipy1, clipcx, clipcy, boxx1, boxy1, boxcx, boxcy,
+			NULL, os->bgcolor, os->fgcolor, &character, 1);
+	}
+	else
+	{
+		ft = cache_get_font(orders->rdp->cache, os->font, character);
+		if (ft != NULL)
+		{
+			gx = x + ft->offset;
+			gy = y + ft->baseline;
+			if (boxcx > 1)
+			{
+				ui_rect(orders->rdp->inst, boxx1, boxy1, boxcx, boxcy, os->bgcolor);
+			}
+			ui_start_draw_glyphs(orders->rdp->inst, os->bgcolor, os->fgcolor);
+			ui_draw_glyph(orders->rdp->inst, gx, gy, ft->width, ft->height,
+				ft->pixmap);
+			if (boxcx > 1)
+			{
+				ui_end_draw_glyphs(orders->rdp->inst, boxx1, boxy1, boxcx, boxcy);
+			}
+			else
+			{
+				ui_end_draw_glyphs(orders->rdp->inst, clipx1, clipy1, clipcx, clipcy);
+			}
 		}
 	}
 }
@@ -1834,9 +1864,17 @@ process_cache_glyph(rdpOrders * orders, STREAM s)
 		datasize = (height * ((width + 7) / 8) + 3) & ~3;
 		in_uint8p(s, data, datasize);
 
-		bitmap = ui_create_glyph(orders->rdp->inst, width, height, data);
-		cache_put_font(orders->rdp->cache, font, character, offset, baseline, width,
-			       height, bitmap);
+		if (orders->rdp->settings->text_flags & 1)
+		{
+			ui_add_char(orders->rdp->inst, font, character, offset, baseline,
+				width, height, data);
+		}
+		else
+		{
+			bitmap = ui_create_glyph(orders->rdp->inst, width, height, data);
+			cache_put_font(orders->rdp->cache, font, character, offset, baseline,
+				width, height, bitmap);
+		}
 	}
 }
 

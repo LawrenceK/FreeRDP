@@ -945,12 +945,18 @@ process_demand_active(rdpRdp * rdp, STREAM s, uint16 serverChannelId)
 	rdp_send_control(rdp, RDP_CTL_COOPERATE);
 	rdp_send_control(rdp, RDP_CTL_REQUEST_CONTROL);
 	s = rdp_recv(rdp, &type, &source);	/* RDP_PDU_SYNCHRONIZE */
+	if (s == NULL)
+		return;
 	ASSERT(type == RDP_PDU_DATA);
 	process_data_pdu(rdp, s);
 	s = rdp_recv(rdp, &type, &source);	/* RDP_CTL_COOPERATE */
+	if (s == NULL)
+		return;
 	ASSERT(type == RDP_PDU_DATA);
 	process_data_pdu(rdp, s);
 	s = rdp_recv(rdp, &type, &source);	/* RDP_CTL_GRANTED_CONTROL */
+	if (s == NULL)
+		return;
 	ASSERT(type == RDP_PDU_DATA);
 	process_data_pdu(rdp, s);
 
@@ -969,6 +975,8 @@ process_demand_active(rdpRdp * rdp, STREAM s, uint16 serverChannelId)
 	}
 
 	s = rdp_recv(rdp, &type, &source);	/* RDP_DATA_PDU_FONTMAP */
+	if (s == NULL)
+		return;
 	ASSERT(type == RDP_PDU_DATA);
 	process_data_pdu(rdp, s);
 	reset_order_state(rdp->orders);

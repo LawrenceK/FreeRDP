@@ -435,6 +435,24 @@ ui_authenticate(rdpInst * inst)
 	return inst->ui_authenticate(inst);
 }
 
+void
+ui_add_char(rdpInst * inst, uint8 font, uint16 character, sint16 offset, sint16 baseline,
+	uint16 width, uint16 height, uint8 * data)
+{
+	inst->ui_add_char(inst, font, character, offset, baseline, width, height, data);
+}
+
+void
+ui_draw_text(rdpInst * inst, uint8 font, uint8 flags, uint8 opcode,
+		int mixmode, int x, int y, int clipx, int clipy, int clipcx, int clipcy,
+		int boxx, int boxy, int boxcx, int boxcy, RD_BRUSH * brush,
+		uint32 bgcolor, uint32 fgcolor, uint8 * text, uint8 length)
+{
+	inst->ui_draw_text(inst, font, flags, opcode, mixmode, x, y,
+		clipx, clipy, clipcx, clipcy, boxx, boxy, boxcx, boxcy, brush,
+		bgcolor, fgcolor, text, length);
+}
+
 int
 ui_decode(rdpInst * inst, uint8 * data, int data_size)
 {

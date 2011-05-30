@@ -85,6 +85,7 @@ struct rdp_set
 	int rfx_flags; /* 0 no remotefx */
 	int ui_decode_flags;
 	int use_frame_ack;
+	int text_flags; /* 0 default use ui_draw_glyph, 1 use ui_draw_text */
 	int num_channels;
 	struct rdp_chan channels[16];
 	struct rdp_ext_set extensions[16];
