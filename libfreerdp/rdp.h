@@ -98,6 +98,8 @@ void
 rdp_send_input_mouse(rdpRdp * rdp, time_t time, uint16 pointerFlags, uint16 xPos, uint16 yPos);
 int
 rdp_send_frame_ack(rdpRdp * rdp, int frame_id);
+int
+rdp_send_invalidate(rdpRdp * rdp, int left, int top, int width, int height);
 void
 rdp_sync_input(rdpRdp * rdp, time_t time, uint32 toggle_keys_state);
 void

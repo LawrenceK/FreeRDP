@@ -25,7 +25,7 @@
 #include "constants_ui.h"
 #include "rdpext.h"
 
-#define FREERDP_INTERFACE_VERSION 5
+#define FREERDP_INTERFACE_VERSION 6
 
 #if defined _WIN32 || defined __CYGWIN__
   #ifdef FREERDP_EXPORTS
@@ -81,6 +81,7 @@ struct rdp_inst
 	int (* rdp_channel_data)(rdpInst * inst, int chan_id, char * data, int data_size);
 	void (* rdp_disconnect)(rdpInst * inst);
 	int (* rdp_send_frame_ack)(rdpInst * inst, int frame_id);
+	int (* rdp_send_invalidate)(rdpInst * inst, int left, int top, int width, int height);
 	/* calls from library to ui */
 	void (* ui_error)(rdpInst * inst, const char * text);
 	void (* ui_warning)(rdpInst * inst, const char * text);

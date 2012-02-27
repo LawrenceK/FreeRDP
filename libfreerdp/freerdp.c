@@ -599,6 +599,14 @@ l_rdp_send_frame_ack(rdpInst * inst, int frame_id)
 	return 0;
 }
 
+static int
+l_rdp_send_invalidate(rdpInst * inst, int left, int top, int width, int height)
+{
+	rdpRdp * rdp;
+	rdp = RDP_FROM_INST(inst);
+	return rdp_send_invalidate(rdp, left, top, width, height);
+}
+
 FREERDP_API RD_BOOL
 freerdp_global_init(void)
 {
@@ -630,6 +638,7 @@ freerdp_new(rdpSet * settings)
 	inst->rdp_channel_data = l_rdp_channel_data;
 	inst->rdp_disconnect = l_rdp_disconnect;
 	inst->rdp_send_frame_ack = l_rdp_send_frame_ack;
+	inst->rdp_send_invalidate = l_rdp_send_invalidate;
 	inst->rdp = (void *) rdp_new(settings, inst);
 	inst->disc_reason = 0;
 	return inst;

@@ -224,6 +224,22 @@ rdp_send_frame_ack(rdpRdp * rdp, int frame_id)
 	return 0;
 }
 
+int
+rdp_send_invalidate(rdpRdp * rdp, int left, int top, int width, int height)
+{
+	STREAM s;
+
+	s = rdp_init_data(rdp, 12);
+	out_uint32_le(s, 1);
+	out_uint16_le(s, left);
+	out_uint16_le(s, top);
+	out_uint16_le(s, (left + width) - 1);
+	out_uint16_le(s, (top + height) - 1);
+	s_mark_end(s);
+	rdp_send_data(rdp, s, 33);
+	return 0;
+}
+
 /* Output system time structure */
 void
 rdp_out_systemtime(STREAM s, systemTime sysTime)
